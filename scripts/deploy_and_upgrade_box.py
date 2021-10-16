@@ -15,6 +15,7 @@ def main():
     box = Box.deploy(
         {"from": account}, publish_source=True
     )  # Box is our implementation contract ie it's implemented
+
     proxy_admin = ProxyAdmin.deploy({"from": account}, publish_source=True)
 
     # encode the initialiser function, in bytes for _data param of TransparentUpgradableProxy
@@ -30,6 +31,7 @@ def main():
         {"from": account, "gas_limit": 1000000},
         publish_source=True,
     )
+
     print(f"proxy deployed to {proxy}, you can now upgrade to v2!")
     # get contract using abi and address
     proxy_box = Contract.from_abi(
