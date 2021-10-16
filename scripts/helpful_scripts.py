@@ -2,6 +2,10 @@ from brownie import (
     network,
     accounts,
     config,
+    Box,
+    ProxyAdmin,
+    TransparentUpgradeableProxy,
+    Contract,
 )
 import eth_utils
 
@@ -74,3 +78,27 @@ def upgrade(
             tx = proxy.upgradeTo(new_implementation_address, {"from": account})
 
     return tx
+
+
+def deploy_box_v1_and_proxy():
+    """Deploy boxV1, proxyAdmin and proxy
+    Args:
+
+    Returns:
+        [brownie.network.contract.ProjectContract]box,
+        [brownie.network.contract.ProjectContract]proxy_admin,
+        [brownie.network.contract.ProjectContract]proxy,
+        [brownie.network.contract.ProjectContract]proxy_box
+    """
+    account = get_account()
+    box = Box.deploy({"from": account})
+    proxy_admin = ProxyAdmin.deploy({"from": account})
+    box_encoded_initialiser_func = encode_function_data()
+    proxy = TransparentUpgradeableProxy.deploy(
+        box.address,
+        proxy_admin.address,
+        box_encoded_initialiser_func,
+        {"from": account, "gas_limit": 1000000},
+    )
+    proxy_box = Contract.from_abi("Box", proxy.address, Box.abi)
+    return box, proxy_admin, proxy, proxy_box
